@@ -280,3 +280,134 @@ function deleteUser(btn) {
     row.parentNode.removeChild(row);
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const mapElement = document.getElementById("map");
+  if (mapElement) {
+    var map = L.map("map").setView([40.4167, -3.7033], 11);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+      map,
+    );
+
+    fetch("/api/dashboard")
+      .then((res) => res.json())
+      .then((data) => {
+        data.estaciones.forEach((station) => {
+          const cardHtml = `<b>${station.name}</b><br>Temp: ${station.temperature}°C<br>Wind: ${station.wind_speed} km/h`;
+          L.marker([station.lat, station.lon]).addTo(map).bindTooltip(cardHtml);
+        });
+
+        if (data.ranking.top_temp) {
+          document.getElementById("top-temp-name").innerText =
+            data.ranking.top_temp.name;
+          document.getElementById("top-temp-val").innerText =
+            data.ranking.top_temp.value + "°C";
+        }
+      })
+      .catch((err) => console.error("Error loading dashboard data:", err));
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 500);
+  }
+
+  if (document.getElementById("time_picker")) {
+    flatpickr("#time_picker", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+    });
+  }
+
+  const csvInput = document.getElementById("real-csv-input");
+  if (csvInput) {
+    csvInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0)
+        document.getElementById("csv-file-name-display").innerText =
+          "📁 " + e.target.files[0].name;
+    });
+  }
+
+  const jsonInput = document.getElementById("real-json-input");
+  if (jsonInput) {
+    jsonInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0)
+        document.getElementById("json-file-name-display").innerText =
+          "{ } " + e.target.files[0].name;
+    });
+  }
+});
+
+function toggleForm() {
+  const form = document.getElementById("registro-form-container");
+  const tableView = document.querySelector(".data-view-container");
+  if (form.style.display === "none") {
+    form.style.display = "block";
+    tableView.style.display = "none";
+  } else {
+    form.style.display = "none";
+    tableView.style.display = "block";
+  }
+}
+
+function openCsvModal() {
+  document.getElementById("csv-modal").style.display = "flex";
+}
+function closeCsvModal() {
+  document.getElementById("csv-modal").style.display = "none";
+}
+
+function processCsvUpload() {
+  const fileInput = document.getElementById("real-csv-input");
+  if (fileInput.files.length === 0)
+    return alert("Selecciona un archivo CSV primero.");
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  fetch("/upload_csv", { method: "POST", body: formData })
+    .then((response) => response.json())
+    .then((data) => {
+      alert("Éxito: " + data.message);
+      closeCsvModal();
+      window.location.href = "/";
+    })
+    .catch((error) => alert("Error al subir el archivo CSV al servidor."));
+}
+
+function openJsonModal() {
+  document.getElementById("json-modal").style.display = "flex";
+}
+function closeJsonModal() {
+  document.getElementById("json-modal").style.display = "none";
+}
+
+function processJsonUpload() {
+  const fileInput = document.getElementById("real-json-input");
+  if (fileInput.files.length === 0)
+    return alert("Selecciona un archivo JSON primero.");
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  fetch("/upload_json", { method: "POST", body: formData })
+    .then((response) => response.json())
+    .then((data) => {
+      alert("Éxito: " + data.message);
+      closeJsonModal();
+      window.location.href = "/";
+    })
+    .catch((error) => alert("Error al subir el archivo JSON al servidor."));
+}
+
+function openTab(evt, tabName) {
+  document
+    .querySelectorAll(".tab-content")
+    .forEach((tab) => (tab.style.display = "none"));
+  document
+    .querySelectorAll(".tab-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.classList.add("active");
+}

@@ -4,14 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Madrid Weather Dashboard - Añadir Datos</title>
-
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <link
       rel="stylesheet"
@@ -33,20 +28,20 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="/add_data" class="nav-link active">
+            <a href="/añadir-datos" class="nav-link active">
               <i class="fas fa-plus"></i>
               <span class="nav-text">Añadir Datos</span>
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/informes" class="nav-link">
               <i class="fas fa-file-invoice"></i>
               <span class="nav-text">Informes</span>
             </a>
           </li>
         </ul>
         <div class="bottom-content">
-          <a href="/templates/settings.html" class="nav-link">
+          <a href="/settings" class="nav-link">
             <i class="fas fa-cog"></i> <span class="nav-text">Ajustes</span>
           </a>
         </div>
@@ -62,24 +57,14 @@
             <button
               class="import-btn"
               onclick="openJsonModal()"
-              style="
-                border: none;
-                cursor: pointer;
-                font-family: inherit;
-                font-size: inherit;
-              "
+              style="border: none; cursor: pointer"
             >
               <i class="fas fa-file-code"></i> Importar JSON
             </button>
             <button
               class="import-btn"
               onclick="openCsvModal()"
-              style="
-                border: none;
-                cursor: pointer;
-                font-family: inherit;
-                font-size: inherit;
-              "
+              style="border: none; cursor: pointer"
             >
               <i class="fas fa-file-csv"></i> Importar CSV
             </button>
@@ -98,19 +83,7 @@
             <span>Viento (km/h)</span>
             <span>Acciones</span>
           </div>
-          <div id="table-body">
-            <div class="view-row">
-              <span class="cell-date">2026-04-09 23:12</span>
-              <span class="cell-station">Ciudad Universitaria</span>
-              <span class="cell-temp">21.5</span>
-              <span class="cell-hum">45</span>
-              <span class="cell-wind">12</span>
-              <div class="cell-actions">
-                <i class="fas fa-edit"></i>
-                <i class="fas fa-trash"></i>
-              </div>
-            </div>
-          </div>
+          <div id="table-body"></div>
         </div>
 
         <div
@@ -123,7 +96,6 @@
             style="
               display: flex;
               justify-content: space-between;
-              align-items: center;
               margin-bottom: 25px;
             "
           >
@@ -138,7 +110,6 @@
                 color: #003366;
                 cursor: pointer;
                 font-weight: bold;
-                font-size: 1rem;
               "
             >
               <i class="fas fa-times"></i> Cerrar
@@ -182,12 +153,7 @@
                   />
                   <i
                     class="fas fa-clock"
-                    style="
-                      position: absolute;
-                      right: 15px;
-                      color: #003366;
-                      pointer-events: none;
-                    "
+                    style="position: absolute; right: 15px; color: #003366"
                   ></i>
                 </div>
               </div>
@@ -219,17 +185,6 @@
               <div class="input-group">
                 <label>Velocidad Viento (km/h)</label>
                 <input type="number" id="input-wind" placeholder="0" required />
-              </div>
-            </div>
-
-            <div class="form-row full-width" style="margin-top: 15px">
-              <div class="input-group">
-                <label for="comments">Comentarios</label>
-                <textarea
-                  id="comments"
-                  rows="3"
-                  placeholder="Notas sobre el clima..."
-                ></textarea>
               </div>
             </div>
 
@@ -276,6 +231,7 @@
             </a>
           </div>
           <hr class="modal-divider" />
+
           <div class="upload-zone" id="csv-drop-zone">
             <i class="fas fa-cloud-upload-alt upload-icon"></i>
             <p>Arrastra tu archivo CSV aquí o</p>
@@ -323,6 +279,7 @@
             </a>
           </div>
           <hr class="modal-divider" />
+
           <div class="upload-zone" id="json-drop-zone">
             <i class="fas fa-file-code upload-icon"></i>
             <p>Arrastra tu archivo JSON aquí o</p>
@@ -353,223 +310,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
-      // ==========================================
-      // 1. INICIALIZAR RELOJ (FLATPICKR)
-      // ==========================================
-      window.onload = function () {
-        if (typeof flatpickr !== "undefined") {
-          flatpickr("#time_picker", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            static: true,
-          });
-        }
-      };
-
-      // ==========================================
-      // 2. LÓGICA DEL FORMULARIO MANUAL
-      // ==========================================
-      function toggleForm() {
-        const form = document.getElementById("registro-form-container");
-        const tableView = document.querySelector(".data-view-container");
-        const actionBar = document.querySelector(".action-bar");
-
-        if (form.style.display === "none") {
-          form.style.display = "block";
-          tableView.style.display = "none";
-          actionBar.style.display = "none";
-        } else {
-          form.style.display = "none";
-          tableView.style.display = "block";
-          actionBar.style.display = "flex";
-        }
-      }
-
-      document
-        .querySelector(".weather-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const rowData = {
-            date: document.getElementById("date").value,
-            time: document.getElementById("time_picker").value,
-            station: document.getElementById("station").value,
-            temp: document.getElementById("input-temp").value,
-            hum: document.getElementById("input-hum").value,
-            wind: document.getElementById("input-wind").value,
-          };
-
-          const tableBody = document.getElementById("table-body");
-          const newRow = document.createElement("div");
-          newRow.className = "view-row";
-          newRow.innerHTML = `
-        <span class="cell-date">${rowData.date} ${rowData.time}</span>
-        <span class="cell-station">${rowData.station}</span>
-        <span class="cell-temp">${rowData.temp}</span>
-        <span class="cell-hum">${rowData.hum}</span>
-        <span class="cell-wind">${rowData.wind}</span>
-        <div class="cell-actions">
-          <i class="fas fa-edit"></i>
-          <i class="fas fa-trash"></i>
-        </div>
-      `;
-
-          tableBody.prepend(newRow);
-          toggleForm();
-          this.reset();
-          alert("¡Registro añadido con éxito!");
-        });
-
-      // ==========================================
-      // 3. LÓGICA DEL MODAL CSV
-      // ==========================================
-      function openCsvModal() {
-        document.getElementById("csv-modal").style.display = "flex";
-      }
-
-      function closeCsvModal() {
-        document.getElementById("csv-modal").style.display = "none";
-        document.getElementById("real-csv-input").value = "";
-        document.getElementById("csv-file-name-display").innerText = "";
-      }
-
-      document
-        .getElementById("real-csv-input")
-        .addEventListener("change", function (e) {
-          if (e.target.files.length > 0) {
-            document.getElementById("csv-file-name-display").innerText =
-              "📁 " + e.target.files[0].name;
-          }
-        });
-
-      function processCsvUpload() {
-        const fileInput = document.getElementById("real-csv-input");
-        if (fileInput.files.length === 0) {
-          alert("Por favor, selecciona un archivo CSV primero.");
-          return;
-        }
-
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = function (e) {
-          parseAndInjectCSV(e.target.result);
-          closeCsvModal();
-          alert("¡Datos de " + file.name + " importados con éxito a la tabla!");
-        };
-        reader.readAsText(file);
-      }
-
-      function parseAndInjectCSV(csvText) {
-        const rows = csvText.trim().split("\n");
-        const tableBody = document.getElementById("table-body");
-
-        for (let i = 1; i < rows.length; i++) {
-          const cols = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-          if (cols.length >= 6) {
-            const station = cols[0].replace(/"/g, "").trim();
-            const date = cols[1].trim();
-            const time = cols[2].trim();
-            const temp = cols[3].trim();
-            const hum = cols[4].trim();
-            const wind = cols[5].trim();
-
-            const newRow = document.createElement("div");
-            newRow.className = "view-row";
-            newRow.innerHTML = `
-            <span class="cell-date">${date} ${time}</span>
-            <span class="cell-station">${station}</span>
-            <span class="cell-temp">${temp}</span>
-            <span class="cell-hum">${hum}</span>
-            <span class="cell-wind">${wind}</span>
-            <div class="cell-actions"><i class="fas fa-edit"></i><i class="fas fa-trash"></i></div>
-          `;
-            tableBody.prepend(newRow);
-          }
-        }
-      }
-
-      // ==========================================
-      // 4. LÓGICA DEL MODAL JSON
-      // ==========================================
-      function openJsonModal() {
-        document.getElementById("json-modal").style.display = "flex";
-      }
-
-      function closeJsonModal() {
-        document.getElementById("json-modal").style.display = "none";
-        document.getElementById("real-json-input").value = "";
-        document.getElementById("json-file-name-display").innerText = "";
-      }
-
-      document
-        .getElementById("real-json-input")
-        .addEventListener("change", function (e) {
-          if (e.target.files.length > 0) {
-            document.getElementById("json-file-name-display").innerText =
-              "{ } " + e.target.files[0].name;
-          }
-        });
-
-      function processJsonUpload() {
-        const fileInput = document.getElementById("real-json-input");
-        if (fileInput.files.length === 0) {
-          alert("Por favor, selecciona un archivo JSON primero.");
-          return;
-        }
-
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-          try {
-            const parsedData = JSON.parse(event.target.result);
-            parseAndInjectJSON(parsedData);
-            closeJsonModal();
-            alert(
-              "¡Datos de " + file.name + " importados con éxito a la tabla!",
-            );
-          } catch (error) {
-            alert("Error: El archivo no es un JSON válido.");
-            console.error("JSON Parsing Error:", error);
-          }
-        };
-        reader.readAsText(file);
-      }
-
-      function parseAndInjectJSON(data) {
-        const tableBody = document.getElementById("table-body");
-        const dataArray = Array.isArray(data) ? data : [data];
-
-        dataArray.reverse().forEach((row) => {
-          // Claves en español ajustadas a tu JSON
-          const station = row.estacion || "Desconocida";
-          const date = row.fecha || "----/--/--";
-          const time = row.hora || "--:--";
-          const temp = row.temperatura !== undefined ? row.temperatura : "--";
-          const hum = row.humedad !== undefined ? row.humedad : "--";
-          const wind =
-            row.velocidad_viento !== undefined ? row.velocidad_viento : "--";
-
-          const newRow = document.createElement("div");
-          newRow.className = "view-row";
-          newRow.innerHTML = `
-          <span class="cell-date">${date} ${time}</span>
-          <span class="cell-station">${station}</span>
-          <span class="cell-temp">${temp}</span>
-          <span class="cell-hum">${hum}</span>
-          <span class="cell-wind">${wind}</span>
-          <div class="cell-actions">
-            <i class="fas fa-edit"></i>
-            <i class="fas fa-trash"></i>
-          </div>
-        `;
-          tableBody.prepend(newRow);
-        });
-      }
-    </script>
+    <script src="/static/script.js"></script>
   </body>
 </html>
